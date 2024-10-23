@@ -2,7 +2,9 @@ Minimal cli based Activity monitor for mac. Motivated by my company since they i
 
 --------
 
+--
 How to install:
+--
 
 git clone {this repo}
 
@@ -44,4 +46,4 @@ cli/install/cli #query the daemon.
 
 --
 
-Only tested on latest mac version (mbp m2)
+Only tested on latest mac version (mbp m2). If this gets any traction at all I will attempt to make it more user friendly...
