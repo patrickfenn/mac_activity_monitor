@@ -86,7 +86,6 @@ void Cli::install_one_off_watch() {
             std::endl;
         exit(EXIT_FAILURE);
     }
-    std::cout << attempts << std::endl;
 }
 
 std::time_t Cli::getModifiedTime() {
