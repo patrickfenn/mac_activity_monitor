@@ -85,26 +85,21 @@ void Cli::install_one_off_watch() {
     int attempts = 0;
     int nev = -1;
     do {
+        /*
+         * There seems to be a race to the _activePath file between the
+         * file write of the counter and the access of this tool. So give
+         * it some time to finish.
+         */
+        usleep(100);
         nev = kevent(kq, &change, 1, &event, 1, nullptr);
-        if (nev == -1) {
-            /*
-             * There seems to be a race to the _activePath file between the
-             * file write of the counter and the access of this tool. So give
-             * it some time to finish.
-             */
-            if (errno == EPERM || errno == ETIMEDOUT || errno == EWOULDBLOCK) {
-                attempts++;
-                if (attempts == MAX_ATTEMPTS) {
-                    std::cerr << "Issue with file open" << std::endl;
-                    exit(EXIT_FAILURE);
-                } else {
-                    usleep(100);
-                }
-            } else { // Unforeseen errno
-                std::cerr << "kevent error: " << strerror(errno) << std::endl;
-            }
-        }
-    } while ( !(event.fflags & NOTE_WRITE) );
+        attempts++;
+    } while ( (nev == -1 || !(event.fflags & NOTE_WRITE))
+        && attempts <= MAX_ATTEMPTS );
     close(fd);
     close(kq);
+    if (attempts > MAX_ATTEMPTS) {
+        std::cerr << "Failed to read activity time: " << strerror(errno) <<
+            std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
