@@ -3,7 +3,7 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -Wall -Werror -Iinclude
 
 # Executable target
-TARGET = install/cli
+TARGET = install/activity
 
 # Object files
 OBJS = build/cli.o build/cli_main.o

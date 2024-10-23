@@ -6,7 +6,7 @@ COUNTER_DIR = counter
 INSTALL_DIR = install
 
 # Binaries
-CLI_BINARY = $(CLI_DIR)/install/cli
+CLI_BINARY = $(CLI_DIR)/install/activity
 COUNTER_BINARY = $(COUNTER_DIR)/install/counter
 
 # Final install location

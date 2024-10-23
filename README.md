@@ -1,6 +1,6 @@
 Minimal cli based Activity monitor for mac. Motivated by my company since they insist on removing everything else I have tried to use.
 
-So I figure I can just write my own. The way it works is that this daemon is created and increments every minute. Then the cli tool just sends it a sighup which dumps the file and is read by the tool.
+So I figure I can just write my own. The way it works is that this daemon is created and increments every minute. Then the cli tool just sends it a sighup which dumps the file and is read by the tool. It doesn't read anything about any windows and it just queries a macos api to check how long the screen has been idle.
 
 --------
 
@@ -33,7 +33,7 @@ To Run:
 
 install/counter #start the daemon
 
-install/cli #query the daemon.
+install/activity #query the daemon.
 
 --
 Example:
@@ -44,10 +44,16 @@ Daemon process PID: 42854
 
 ...
 
-➜  install/cli
+➜  install/activity
 
 16 hours, 22 minutes
 
 --
 
-Only tested on latest mac version (mbp m2).
+Only tested on latest mac version (mbp m2). For easier use, you can do:
+
+chmod +x install/activity
+
+sudo mv install/activity /usr/local/bin
+
+And then it will be available in your path.
