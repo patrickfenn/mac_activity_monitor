@@ -79,9 +79,11 @@ bool Counter::resetTime() {
 
     std::string current_day = days_of_week[local_time->tm_wday];
     int current_hour = local_time->tm_hour;
+    int current_minute = local_time->tm_min;
 
     if (current_day == _dayToReset &&
-        std::to_string(current_hour) == _hourToReset) {
+        std::to_string(current_hour) == _hourToReset &&
+        current_minute == 0) {
 
         return true;
     }
