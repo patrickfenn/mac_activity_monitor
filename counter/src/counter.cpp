@@ -16,7 +16,7 @@
 #define ACTIVE_TIME_PATH "/Users/patrickfenn/active"
 #define PID_PATH "/Users/patrickfenn/counter.pid"
 #define DAY_TO_RESET "Sunday" // Resets Sunday at...
-#define HOUR_TO_RESET "00" // Midnight
+#define HOUR_TO_RESET "00" // Midnight (24 hour)
 #define MAX_IDLE_SECONDS 600 // After 10 minutes active time stops incrementing
 #define INCREMENT_INTERVAL_SECONDS 60 // Increments every minute
 
