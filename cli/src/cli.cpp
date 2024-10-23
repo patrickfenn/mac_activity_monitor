@@ -12,7 +12,7 @@
 // How many times it will loop to try to read activity time
 #define MAX_ATTEMPTS 5
 
-// How long it will wait between acitivty time reads
+// How long it will wait between activity time reads
 #define SLEEP_INTERVAL_SECONDS 1
 
 Cli::Cli() {
