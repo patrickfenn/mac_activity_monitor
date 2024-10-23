@@ -9,13 +9,17 @@ git clone {this repo}
 Set knobs in :
 
 counter/src/counter.cpp
+
 cli/src/cli.cpp
 
 ->
 
 #define ACTIVE_TIME_PATH "/Users/patrickfenn/active" # path to active time dump path
+
 #define PID_PATH "/Users/patrickfenn/counter.pid" # path to pid of counter daemon
+
 #define DAY_TO_RESET "Sunday" // Resets Sunday at...
+
 #define HOUR_TO_RESET "00" // Midnight (24 hour)
 
 Ensure they are both writeable by the application.
@@ -25,12 +29,17 @@ To Build:
 --
 
 cd cli
+
 make
+
 cd ../counter
+
 make
+
 cd ..
 
 counter/install/counter #start the daemon
+
 cli/install/cli #query the daemon.
 
 --
