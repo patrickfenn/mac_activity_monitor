@@ -11,23 +11,33 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <cstdlib>
 
-// Knobs
-#define ACTIVE_TIME_PATH "/Users/patrickfenn/active"
-#define PID_PATH "/Users/patrickfenn/counter.pid"
-#define DAY_TO_RESET "Sunday" // Resets Sunday at...
-#define HOUR_TO_RESET "00" // Midnight (24 hour)
-#define MAX_IDLE_SECONDS 600 // After 10 minutes active time stops incrementing
 #define INCREMENT_INTERVAL_SECONDS 60 // Increments every minute
-
 
 extern char **environ;
 
 Counter::Counter() {
-    _activeTimeFilePath = ACTIVE_TIME_PATH;
-    _dayToReset = DAY_TO_RESET;
-    _hourToReset = HOUR_TO_RESET;
-    _maxIdleSeconds = MAX_IDLE_SECONDS;
+    _activePath = "/Users/Shared/activity.count";
+    _pidPath = "/Users/Shared/activity.pid";
+    char* dayToResetChar = std::getenv("DAY_TO_RESET");
+    char* hourToResetChar = std::getenv("HOUR_TO_RESET");
+    char* maxIdleSecondsChar = std::getenv("MAX_IDLE_SECONDS");
+
+    if (dayToResetChar)
+        _dayToReset = std::string(dayToResetChar);
+    else
+        _dayToReset = "Sunday";
+    if (hourToResetChar)
+        _hourToReset = std::string(hourToResetChar);
+    else
+        _hourToReset = "00";
+    if (maxIdleSecondsChar) {
+        std::string maxIdleSecondsStr = std::string(maxIdleSecondsChar);
+        _maxIdleSeconds = std::stoul(maxIdleSecondsStr);
+    } else {
+        _maxIdleSeconds = 600;
+    }
 }
 
 Counter::~Counter() {
@@ -70,8 +80,8 @@ bool Counter::resetTime() {
     std::string current_day = days_of_week[local_time->tm_wday];
     int current_hour = local_time->tm_hour;
 
-    if (current_day == DAY_TO_RESET &&
-        std::to_string(current_hour) == HOUR_TO_RESET) {
+    if (current_day == _dayToReset &&
+        std::to_string(current_hour) == _hourToReset) {
 
         return true;
     }
@@ -131,10 +141,10 @@ void Counter::daemonize() {
     if (pid > 0) {
         std::cout << "Daemon process PID: " << pid << std::endl;
         // Write the PID to a file for later tracking
-        std::ofstream PID_PATH(PID_PATH);
-        if (PID_PATH.is_open()) {
-            PID_PATH << pid << std::endl;
-            PID_PATH.close();
+        std::ofstream out(_pidPath.c_str());
+        if (out.is_open()) {
+            out << pid << std::endl;
+            out.close();
         }
         exit(EXIT_SUCCESS);
     }
@@ -179,7 +189,7 @@ unsigned long Counter::getSystemIdleTime() {
 }
 
 bool Counter::write() {
-    std::ofstream out(_activeTimeFilePath, std::ios_base::binary);
+    std::ofstream out(_activePath, std::ios_base::binary);
     if (!out) {
         std::cerr << "Failed to open active time file." << std::endl;
         return false;
@@ -191,7 +201,7 @@ bool Counter::write() {
 
 bool Counter::read() {
     std::stringstream ss;
-    std::ifstream in(_activeTimeFilePath, std::ios_base::binary);
+    std::ifstream in(_activePath, std::ios_base::binary);
     if (!in) {
         std::cerr << "Failed to open active time file." << std::endl;
         return false;

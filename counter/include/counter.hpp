@@ -19,7 +19,8 @@ private:
     bool write();
     bool read();
     bool resetTime();
-    std::string _activeTimeFilePath;
+    std::string _activePath;
+    std::string _pidPath;
     std::string _dayToReset;
     std::string _hourToReset;
     unsigned long _maxIdleSeconds;

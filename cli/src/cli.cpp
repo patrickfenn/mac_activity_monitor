@@ -11,11 +11,11 @@
 #include <fcntl.h>
 #include <cstring>
 
-#define ACTIVE_TIME_PATH "/Users/patrickfenn/active"
-#define PID_PATH "/Users/patrickfenn/counter.pid"
 #define MAX_ATTEMPTS 5
 
 Cli::Cli() {
+    _activePath = "/Users/Shared/activity.count";
+    _pidPath = "/Users/Shared/activity.pid";
     sendSigHup();
     install_one_off_watch();
     print();
@@ -25,7 +25,7 @@ Cli::~Cli() {
 }
 
 std::string Cli::readActiveTime() {
-    std::ifstream in(ACTIVE_TIME_PATH, std::ios_base::binary);
+    std::ifstream in(_activePath.c_str(), std::ios_base::binary);
     if (!in) {
         std::cerr << "Failed to open active time file." << std::endl;
         return "";
@@ -39,7 +39,7 @@ std::string Cli::readActiveTime() {
 void Cli::sendSigHup() {
     pid_t pid;
     std::stringstream ss;
-    std::ifstream in(PID_PATH, std::ios_base::binary);
+    std::ifstream in(_pidPath, std::ios_base::binary);
     if (!in) {
         std::cerr << "Failed to open pid file." << std::endl;
         return;
@@ -70,7 +70,7 @@ void Cli::install_one_off_watch() {
         exit(EXIT_FAILURE);
     }
 
-    int fd = open(ACTIVE_TIME_PATH, O_EVTONLY);
+    int fd = open(_activePath.c_str(), O_EVTONLY);
     if (fd == -1) {
         std::cerr << "Failed to open file: " << strerror(errno) << std::endl;
         close(kq);
@@ -85,10 +85,10 @@ void Cli::install_one_off_watch() {
     int attempts = 0;
     int nev = -1;
     do {
-        kevent(kq, &change, 1, &event, 1, nullptr);
+        nev = kevent(kq, &change, 1, &event, 1, nullptr);
         if (nev == -1) {
             /*
-             * There seems to be a race to the ACTIVE_TIME_PATH file between the
+             * There seems to be a race to the _activePath file between the
              * file write of the counter and the access of this tool. So give
              * it some time to finish.
              */
@@ -100,12 +100,8 @@ void Cli::install_one_off_watch() {
                 } else {
                     usleep(100);
                 }
-            } else {
+            } else { // Unforeseen errno
                 std::cerr << "kevent error: " << strerror(errno) << std::endl;
-            }
-        } else if (nev > 0) {
-            if (event.fflags & NOTE_WRITE) {
-                std::cout << "File modified!" << std::endl;
             }
         }
     } while ( !(event.fflags & NOTE_WRITE) );
