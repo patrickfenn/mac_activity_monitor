@@ -49,5 +49,18 @@ counter/install/counter #start the daemon
 cli/install/cli #query the daemon.
 
 --
+Example:
+--
+➜  counter install/counter
+
+Daemon process PID: 42854
+
+...
+
+➜  cli install/cli
+
+16 hours, 22 minutes
+
+--
 
 Only tested on latest mac version (mbp m2). If this gets any traction at all I will attempt to make it more user friendly...
