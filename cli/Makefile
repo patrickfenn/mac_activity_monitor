@@ -12,7 +12,7 @@ OBJS = build/cli.o build/cli_main.o
 $(TARGET): $(OBJS)
 	@mkdir -p install
 	@echo "Linking $(OBJS) into $(TARGET)"
-	$(CXX) $(OBJS) -o $(TARGET) -framework IOKit -framework CoreFoundation
+	$(CXX) $(OBJS) -o $(TARGET)
 	@echo "Executable created: $(TARGET)"
 
 # Compile cli.cpp

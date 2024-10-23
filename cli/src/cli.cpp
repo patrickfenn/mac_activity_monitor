@@ -5,17 +5,20 @@
 #include <sstream>
 #include <signal.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/event.h>
 #include <sys/time.h>
 #include <fcntl.h>
 #include <cstring>
 
+// How many times it will loop to try to read activity time
 #define MAX_ATTEMPTS 5
+
+// How long it will wait between acitivty time reads
+#define SLEEP_INTERVAL_SECONDS 1
 
 Cli::Cli() {
     _activePath = "/Users/Shared/activity.count";
     _pidPath = "/Users/Shared/activity.pid";
+    _activePathModTime = getModifiedTime();
     sendSigHup();
     install_one_off_watch();
     print();
@@ -64,42 +67,48 @@ void Cli::print() {
 }
 
 void Cli::install_one_off_watch() {
-    int kq = kqueue();
-    if (kq == -1) {
-        std::cerr << "Failed to create kqueue: " << strerror(errno) << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    int fd = open(_activePath.c_str(), O_EVTONLY);
-    if (fd == -1) {
-        std::cerr << "Failed to open file: " << strerror(errno) << std::endl;
-        close(kq);
-        exit(EXIT_FAILURE);
-    }
-
-    struct kevent change;
-    EV_SET(&change, fd, EVFILT_VNODE, EV_ADD | EV_ENABLE,
-           NOTE_WRITE | NOTE_EXTEND | NOTE_DELETE | NOTE_ATTRIB, 0, nullptr);
-
-    struct kevent event;
     int attempts = 0;
-    int nev = -1;
+    std::time_t currentModTime;
     do {
+        currentModTime = getModifiedTime();
+        if (currentModTime > _activePathModTime)
+            break;
         /*
          * There seems to be a race to the _activePath file between the
          * file write of the counter and the access of this tool. So give
          * it some time to finish.
          */
-        usleep(100);
-        nev = kevent(kq, &change, 1, &event, 1, nullptr);
+        sleep(1);
         attempts++;
-    } while ( (nev == -1 || !(event.fflags & NOTE_WRITE))
-        && attempts <= MAX_ATTEMPTS );
-    close(fd);
-    close(kq);
+    } while ( attempts <= MAX_ATTEMPTS );
     if (attempts > MAX_ATTEMPTS) {
-        std::cerr << "Failed to read activity time: " << strerror(errno) <<
+        std::cerr << "Daemon was unresponsive try again in a bit: " << strerror(errno) <<
             std::endl;
+        exit(EXIT_FAILURE);
+    }
+    std::cout << attempts << std::endl;
+}
+
+std::time_t Cli::getModifiedTime() {
+    try {
+        if (std::filesystem::exists(_activePath)) {
+            // Get the last write time as a filesystem::file_time_type
+            auto ftime = std::filesystem::last_write_time(_activePath);
+
+            // Convert to a system clock time_point
+            auto sctp = std::chrono::time_point_cast<
+                std::chrono::system_clock::duration>(
+                    ftime - std::filesystem::file_time_type::clock::now() +
+                    std::chrono::system_clock::now());
+
+            // Convert the time_point to time_t (a C-style time)
+            return std::chrono::system_clock::to_time_t(sctp);
+        } else {
+            // File doesn't exist, return the current time
+            return std::time(nullptr);
+        }
+    } catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Filesystem error: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
 }

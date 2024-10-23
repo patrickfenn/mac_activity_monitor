@@ -33,6 +33,9 @@ sync: $(CLI_BINARY) $(COUNTER_BINARY)
 	@mkdir -p $(FINAL_INSTALL_DIR)
 	@echo "Syncing binaries to $(FINAL_INSTALL_DIR)"
 	rsync -av $(CLI_BINARY) $(COUNTER_BINARY) $(FINAL_INSTALL_DIR)
+	@echo "Finished..."
+	@echo "Start daemon by running \`install/counter\`"
+	@echo "Query daemon by running \`install/activity\`"
 
 # Clean both projects
 clean:

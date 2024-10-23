@@ -7,8 +7,10 @@ public:
 private:
     std::string _activePath;
     std::string _pidPath;
+    std::time_t _activePathModTime;
     std::string readActiveTime();
     void sendSigHup();
     void print();
     void install_one_off_watch();
+    std::time_t getModifiedTime();
 };
