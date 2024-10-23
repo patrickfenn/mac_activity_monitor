@@ -46,7 +46,9 @@ chmod +x install/activity
 
 sudo mv install/activity /usr/local/bin
 
-And then it will be available in your path.
+And then it will be available in your path. Where you can just type in your preffered shell:
+
+> activity
 
 ---
 
