@@ -20,11 +20,11 @@ cli/src/cli.cpp
 
 #define PID_PATH "/Users/patrickfenn/counter.pid" # path to pid of counter daemon
 
+Ensure they are both writeable by the application.
+
 #define DAY_TO_RESET "Sunday" // Resets Sunday at...
 
 #define HOUR_TO_RESET "00" // Midnight (24 hour)
-
-Ensure they are both writeable by the application.
 
 --
 To Build:
@@ -39,6 +39,10 @@ cd ../counter
 make
 
 cd ..
+
+--
+To Run:
+--
 
 counter/install/counter #start the daemon
 
