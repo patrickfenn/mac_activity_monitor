@@ -85,9 +85,8 @@ void Counter::reset() {
 
 void Counter::start() {
     daemonize();
-    if (!read()) {
-        reset();
-    }
+    read();
+    updateNextReset();
     std::signal(SIGHUP, handleSignal);
     std::signal(SIGSTOP, handleSignal);
     std::thread loopThread(&Counter::loop, this);
