@@ -38,6 +38,7 @@ Counter::Counter() {
     } else {
         _maxIdleSeconds = 600;
     }
+    _activeTime = std::vector<unsigned long long>(7,0);
 }
 
 Counter::~Counter() {
@@ -58,6 +59,8 @@ void Counter::handleSignal(int signal) {
 }
 
 void Counter::loop() {
+    std::time_t now = std::time(nullptr);
+    local_time = std::localtime(&now);
     while (true) {
         if (resetTime())
             getInstance()->reset();
@@ -69,10 +72,6 @@ void Counter::loop() {
 }
 
 bool Counter::resetTime() {
-    // Get the current local time
-    std::time_t now = std::time(nullptr);
-    std::tm* local_time = std::localtime(&now);
-
     static std::string days_of_week[] = {
         "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
         "Friday", "Saturday"};
@@ -92,19 +91,17 @@ bool Counter::resetTime() {
 }
 
 void Counter::increment() {
-    _activeTime++;
+    _activeTime[local_time->tm_wday]++;
 }
 
 void Counter::reset() {
-    _activeTime = 0;
+    _activeTime = std::vector<unsigned long long>(7,0);
 }
 
 void Counter::start() {
     daemonize();
-    // Cli expects for file to be there so a watch can be installed.
     if (!read()) {
-        _activeTime = 0;
-        write();
+        _activeTime = std::vector<unsigned long long>(7,0);
     }
     std::signal(SIGHUP, handleSignal);
     std::signal(SIGSTOP, handleSignal);
@@ -196,13 +193,18 @@ bool Counter::write() {
         std::cerr << "Failed to open active time file." << std::endl;
         return false;
     }
-    out << _activeTime;
+    for (const auto & dailyActiveTime: _activeTime)
+        out << dailyActiveTime << ' ';
     out.close();
     return true;
 }
 
 bool Counter::read() {
     std::stringstream ss;
+    std::string line;
+    std::string number;
+    unsigned long long num;
+    int i = 0;
     std::ifstream in(_activePath, std::ios_base::binary);
     if (!in) {
         std::cerr << "Failed to open active time file." << std::endl;
@@ -210,6 +212,23 @@ bool Counter::read() {
     }
     ss << in.rdbuf();
     in.close();
-    _activeTime = std::stoull(ss.str());
+    _activeTime.clear();
+    line = ss.str();
+    for (const char & c : line) {
+        if (c != ' ') {
+            number += c;
+        } else {
+            if (number != "") {
+                num = std::stoull(number);
+                _activeTime[i++] = num;
+                number = "";
+                num = 0;
+            }
+        }
+    }
+    if (_activePath.size() != 7) {
+        std::cerr << "Was unable to read in a full week of times." << std::endl;
+        return 0;
+    }
     return 1;
 }

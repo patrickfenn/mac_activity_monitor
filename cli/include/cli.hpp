@@ -13,4 +13,5 @@ private:
     void print();
     void install_one_off_watch();
     std::time_t getModifiedTime();
+    std::string formatDoubleString(const std::string& input);
 };

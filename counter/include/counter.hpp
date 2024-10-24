@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 #define COUNTER Counter::getInstance()
 
@@ -24,5 +25,6 @@ private:
     std::string _dayToReset;
     std::string _hourToReset;
     unsigned long _maxIdleSeconds;
-    unsigned long long _activeTime;
+    std::vector<unsigned long long> _activeTime;
+    std::tm* local_time;
 };

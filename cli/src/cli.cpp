@@ -15,6 +15,9 @@
 // How long it will wait between activity time reads
 #define SLEEP_INTERVAL_SECONDS 1
 
+#define PRINT_BORDER \
+    "-----------------------------------------"
+
 Cli::Cli() {
     _activePath = "/Users/Shared/activity.count";
     _pidPath = "/Users/Shared/activity.pid";
@@ -54,16 +57,56 @@ void Cli::sendSigHup() {
 }
 
 void Cli::print() {
+    static std::vector<char> weekDays = {'S', 'M', 'T', 'W', 'T', 'F', 'S'};
     std::string activeTime = readActiveTime();
+    std::string number = "";
+    unsigned long long num = 0;
+    unsigned long long totalHours = 0;
+    unsigned long long totalMinutes = 0;
+    double totalHoursMinutes = 0;
+    unsigned long long activeTimeHours = 0;
+    unsigned long long activeTimeMinutes = 0;
+    double activeTimeHoursMinutes = 0.0;
+    std::vector<unsigned long long> nums;
+    std::vector<std::string> weekCounts;
     if (activeTime == "") {
         std::cerr << "Failed to fetch active time";
         return;
     }
-    // File has unit type of Minutes
-    unsigned long long activeTimeLong = std::stoull(activeTime);
-    unsigned long long activeTimeHours = activeTimeLong / 60;
-    unsigned long long activeTimeSeconds = activeTimeLong % 60;
-    std::cout << activeTimeHours << " hours, " << activeTimeSeconds << " minutes" << std::endl;
+    for (const char & c : activeTime) {
+        if (c != ' ') {
+            number += c;
+        } else {
+            if (number != "") {
+                num = std::stoull(number);
+                totalMinutes += num;
+                nums.push_back(num);
+                number = "";
+                num = 0;
+            }
+        }
+    }
+    for (unsigned long long & activeTime: nums) {
+        // File has unit type of Minutes
+        activeTimeHours = activeTime / 60;
+        activeTimeMinutes = activeTime % 60;
+        activeTimeHoursMinutes = activeTimeHours + ((double)activeTimeMinutes / 60.00);
+        weekCounts.push_back(std::to_string(activeTimeHoursMinutes));
+    }
+    totalHours = totalMinutes / 60;
+    totalHoursMinutes = totalHours + ((double)totalMinutes / 60.00);
+    std::cout << PRINT_BORDER << std::endl;
+    std::cout << "Weekly hours: " << formatDoubleString(std::to_string(totalHoursMinutes))  << std::endl;
+    std::cout << "Weekly breakdown hours: " << std::endl;
+    for (const auto & entry : weekCounts) {
+        std::cout << formatDoubleString(entry) << ' ';
+    }
+    std::cout << std::endl;
+    for (const auto & c: weekDays) {
+        std::cout << c << "     ";
+    }
+    std::cout << std::endl;
+    std::cout << PRINT_BORDER << std::endl;
 }
 
 void Cli::install_one_off_watch() {
@@ -82,7 +125,7 @@ void Cli::install_one_off_watch() {
         attempts++;
     } while ( attempts <= MAX_ATTEMPTS );
     if (attempts > MAX_ATTEMPTS) {
-        std::cerr << "Daemon was unresponsive try again in a bit: " << strerror(errno) <<
+        std::cerr << "Daemon was unresponsive: " << strerror(errno) <<
             std::endl;
         exit(EXIT_FAILURE);
     }
@@ -110,4 +153,16 @@ std::time_t Cli::getModifiedTime() {
         std::cerr << "Filesystem error: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
+}
+
+std::string Cli::formatDoubleString(const std::string& input) {
+    // Convert string to double
+    double value = std::stod(input);
+    std::ostringstream formattedStream;
+    // Ensure at least 2 digits before the decimal and 2 after with fixed precision
+    formattedStream << std::fixed << std::setfill('0') << std::setw(5) <<
+        std::setprecision(2) << value;
+
+    // Return the formatted string
+    return formattedStream.str();
 }
