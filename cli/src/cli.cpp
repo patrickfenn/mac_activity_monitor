@@ -57,13 +57,15 @@ void Cli::sendSigHup() {
 }
 
 void Cli::print() {
-    static std::vector<char> weekDays = {'S', 'M', 'T', 'W', 'T', 'F', 'S'};
+    static std::vector<std::string> weekDays = {"S", "M", "T", "W", "T", "F", "S"};
     std::string activeTime = readActiveTime();
     std::string number = "";
     unsigned long long num = 0;
     unsigned long long totalActiveMinutes = 0;
     std::vector<unsigned long long> nums;
     std::vector<std::string> weekCounts;
+    std::vector<std::string> lines;
+    std::string line;
     if (activeTime == "") {
         std::cerr << "Failed to fetch active time";
         return;
@@ -84,20 +86,21 @@ void Cli::print() {
     for (unsigned long long & activeTime: nums) {
         weekCounts.push_back(minutesToHour(activeTime));
     }
-    std::cout << PRINT_BORDER << std::endl;
-    std::cout << "* Weekly hours: " << minutesToHour(totalActiveMinutes)  <<
-        "                        *" << std::endl;
-    std::cout << "* Weekly breakdown hours: " <<
-        "                   *" << std::endl << "* ";
+    lines.push_back("Weekly total hours: " + minutesToHour(totalActiveMinutes));
+    lines.push_back("Weekly breakdown hours:");
     for (const auto & entry : weekCounts) {
-        std::cout << entry << "|";
+        line += entry + "|";
     }
-    std::cout << " *" << std::endl << "* ";
-    for (const auto & c: weekDays) {
-        std::cout << c << "    |";
+    lines.push_back(line);
+    line.clear();
+
+    for (auto & c: weekDays) {
+        line += c + "   |";
     }
-    std::cout << " *" << std::endl;
-    std::cout << PRINT_BORDER << std::endl;
+    lines.push_back(line);
+    wrap_lines(lines);
+    for (const auto & line: lines)
+        std::cout << line << std::endl;
 }
 
 void Cli::install_one_off_watch() {
@@ -152,7 +155,29 @@ std::string Cli::minutesToHour(unsigned long long input) {
     double activeTimeHoursMinutes = (double)activeTimeHours +
         ((double)activeTimeMinutes / 60.00);
     std::stringstream ss;
-    ss << std::fixed << std::setfill('0') << std::setw(5) <<
-        std::setprecision(2) << activeTimeHoursMinutes;
+    ss << std::fixed << std::setfill('0') << std::setw(4) <<
+        std::setprecision(1) << activeTimeHoursMinutes;
     return ss.str();
+}
+
+void Cli::wrap_lines(std::vector<std::string> &lines) {
+    int maxLineSize = 0;
+    std::stringstream ss;
+    for (const auto & line: lines) {
+        if (line.size() > maxLineSize) {
+            maxLineSize = line.size();
+        }
+    }
+    for (int i = 0; i < maxLineSize; i++)
+        ss << '*';
+    std::string border = ss.str() + "****";
+    for (auto & line: lines) {
+        while (line.size() < maxLineSize) {
+            line.append(" ");
+        }
+        line = "* " + line + " *";
+    }
+    lines.insert(lines.begin(), border);
+    lines.push_back(border);
+    return;
 }

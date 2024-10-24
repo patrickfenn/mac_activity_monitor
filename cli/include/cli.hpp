@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 class Cli {
 public:
@@ -14,4 +15,5 @@ private:
     void install_one_off_watch();
     std::time_t getModifiedTime();
     std::string minutesToHour(unsigned long long input);
+    void wrap_lines(std::vector<std::string> &lines);
 };
