@@ -3,7 +3,7 @@ Minimal cli based Activity monitor for mac.
 The way it works is that this daemon is created and increments every minute. Then the cli tool just sends it a sighup which dumps the file and is read by the tool. It doesn't read anything about any windows and it just queries a macos api to check how long the screen has been idle.
 
 
-# How to install:
+# How to build:
 
 ```
 git clone https://github.com/patrickfenn/mac_activity_monitor.git
