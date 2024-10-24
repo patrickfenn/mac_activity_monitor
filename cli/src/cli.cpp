@@ -61,12 +61,10 @@ void Cli::print() {
     std::string activeTime = readActiveTime();
     std::string number = "";
     unsigned long long num = 0;
-    unsigned long long totalHours = 0;
-    unsigned long long totalMinutes = 0;
-    double totalHoursMinutes = 0;
     unsigned long long activeTimeHours = 0;
     unsigned long long activeTimeMinutes = 0;
     double activeTimeHoursMinutes = 0.0;
+    double totalHoursMinutes = 0;
     std::vector<unsigned long long> nums;
     std::vector<std::string> weekCounts;
     if (activeTime == "") {
@@ -79,7 +77,6 @@ void Cli::print() {
         } else {
             if (number != "") {
                 num = std::stoull(number);
-                totalMinutes += num;
                 nums.push_back(num);
                 number = "";
                 num = 0;
@@ -91,10 +88,9 @@ void Cli::print() {
         activeTimeHours = activeTime / 60;
         activeTimeMinutes = activeTime % 60;
         activeTimeHoursMinutes = activeTimeHours + ((double)activeTimeMinutes / 60.00);
+        totalHoursMinutes += activeTimeHoursMinutes;
         weekCounts.push_back(std::to_string(activeTimeHoursMinutes));
     }
-    totalHours = totalMinutes / 60;
-    totalHoursMinutes = totalHours + ((double)totalMinutes / 60.00);
     std::cout << PRINT_BORDER << std::endl;
     std::cout << "Weekly hours: " << formatDoubleString(std::to_string(totalHoursMinutes))  << std::endl;
     std::cout << "Weekly breakdown hours: " << std::endl;
