@@ -20,7 +20,12 @@ cd mac_activity_monitor
 make
 ```
 
----
+# To Run:
+
+```
+install/counter #start the daemon
+install/activity #query the daemon
+```
 
 # For ease of use:
 
@@ -33,14 +38,6 @@ And then it will be available in your path. Where you can just type in your pref
 
 ```
 activity
-```
-
-
-# To Run:
-
-```
-install/counter #start the daemon
-install/activity #query the daemon
 ```
 
 # Example:
@@ -60,8 +57,6 @@ Daemon process PID: 42854
 * S |M |T |W |T |F |S | *
 *************************
 ```
-
----
 
 # How to upgrade counter daemon:
 
