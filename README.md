@@ -37,20 +37,20 @@ Daemon process PID: 42854
 ```
 ➜  install/activity
 ➜  activity_monitor git:(main) ✗ install/activity
-\*************************
-\* Day  total: 0h 9m     \*
-\* Week total: 0h 9m     \*
-\*************************
-\* 00|00|00|00|00|00|00| \*
-\* S |M |T |W |T |F |S | \*
-\************************\*
+*************************
+* Day  total: 0h 21m    *
+* Week total: 0h 21m    *
+*************************
+* 00|00|00|00|00|00|00| *
+* S |M |T |W |T |F |S | *
+*************************
 ```
 
 -----------------------------------------
 
 ---
 
-# For easier use, you can do:
+# For ease of use:
 
 ```
 chmod +x install/activity
@@ -67,9 +67,9 @@ activity
 
 Only tested on latest mac
 
-# How to upgrade:
+# How to upgrade counter daemon:
 
 ```
-kill -STOP `pgrep counter`
-install/counter
+kill -STOP `pgrep counter` # Dump current counters
+install/counter # Run the new daemon
 ```
