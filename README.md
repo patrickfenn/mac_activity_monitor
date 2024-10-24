@@ -66,3 +66,8 @@ And then it will be available in your path. Where you can just type in your pref
 ---
 
 Only tested on latest mac
+
+# How to upgrade:
+
+kill -STOP `pgrep counter`
+install/counter
