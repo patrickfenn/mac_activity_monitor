@@ -36,7 +36,13 @@ Daemon process PID: 42854
 
 ➜  install/activity
 
-16 hours, 22 minutes
+➜  activity_monitor git:(main) ✗ install/activity
+-----------------------------------------
+Weekly hours: 04.65
+Weekly breakdown hours:
+00.00 00.00 00.00 02.65 00.00 00.00 00.00
+S     M     T     W     T     F     S
+-----------------------------------------
 
 ---
 
