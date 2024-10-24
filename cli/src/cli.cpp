@@ -61,10 +61,7 @@ void Cli::print() {
     std::string activeTime = readActiveTime();
     std::string number = "";
     unsigned long long num = 0;
-    unsigned long long activeTimeHours = 0;
-    unsigned long long activeTimeMinutes = 0;
-    double activeTimeHoursMinutes = 0.0;
-    double totalHoursMinutes = 0;
+    unsigned long long totalActiveMinutes = 0;
     std::vector<unsigned long long> nums;
     std::vector<std::string> weekCounts;
     if (activeTime == "") {
@@ -78,26 +75,22 @@ void Cli::print() {
             if (number != "") {
                 num = std::stoull(number);
                 nums.push_back(num);
+                totalActiveMinutes += num;
                 number = "";
                 num = 0;
             }
         }
     }
     for (unsigned long long & activeTime: nums) {
-        // File has unit type of Minutes
-        activeTimeHours = activeTime / 60;
-        activeTimeMinutes = activeTime % 60;
-        activeTimeHoursMinutes = activeTimeHours + ((double)activeTimeMinutes / 60.00);
-        totalHoursMinutes += activeTimeHoursMinutes;
-        weekCounts.push_back(std::to_string(activeTimeHoursMinutes));
+        weekCounts.push_back(minutesToHour(activeTime));
     }
     std::cout << PRINT_BORDER << std::endl;
-    std::cout << "* Weekly hours: " << formatDoubleString(std::to_string(totalHoursMinutes))  <<
+    std::cout << "* Weekly hours: " << minutesToHour(totalActiveMinutes)  <<
         "                        *" << std::endl;
     std::cout << "* Weekly breakdown hours: " <<
         "                   *" << std::endl << "* ";
     for (const auto & entry : weekCounts) {
-        std::cout << formatDoubleString(entry) << "|";
+        std::cout << entry << "|";
     }
     std::cout << " *" << std::endl << "* ";
     for (const auto & c: weekDays) {
@@ -153,11 +146,13 @@ std::time_t Cli::getModifiedTime() {
     }
 }
 
-std::string Cli::formatDoubleString(const std::string& input) {
-    double value = std::stod(input);
-    std::ostringstream formattedStream;
-    // Ensure at least 2 digits before the decimal and 2 after with fixed precision
-    formattedStream << std::fixed << std::setfill('0') << std::setw(5) <<
-        std::setprecision(2) << value;
-    return formattedStream.str();
+std::string Cli::minutesToHour(unsigned long long input) {
+    unsigned long long activeTimeHours = input / 60;
+    unsigned int activeTimeMinutes = input % 60;
+    double activeTimeHoursMinutes = (double)activeTimeHours +
+        ((double)activeTimeMinutes / 60.00);
+    std::stringstream ss;
+    ss << std::fixed << std::setfill('0') << std::setw(5) <<
+        std::setprecision(2) << activeTimeHoursMinutes;
+    return ss.str();
 }
