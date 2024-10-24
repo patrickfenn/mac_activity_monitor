@@ -98,7 +98,7 @@ void Counter::start() {
 
 // Function to redirect file descriptors to /dev/null
 void Counter::redirectFds() {
-    int fd = open("/dev/null", O_RDWR);
+    int fd = open("/Users/Shared/activity.log", O_RDWR);
     if (fd != -1) {
         dup2(fd, STDIN_FILENO);
         dup2(fd, STDOUT_FILENO);
