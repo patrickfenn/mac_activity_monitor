@@ -5,6 +5,7 @@ The way it works is that this daemon is created and increments every minute. The
 
 # How to install:
 
+```
 git clone https://github.com/patrickfenn/mac_activity_monitor.git
 
 #Override optional knobs by settings env variables:
@@ -13,35 +14,29 @@ git clone https://github.com/patrickfenn/mac_activity_monitor.git
 #export DAY_TO_RESET="1" # Reset on Monday
 
 #export HOUR_TO_RESET="00" # At Midnight (24 hour)
-
 #export MAX_IDLE_SECONDS=600 # How many seconds one can be afk for until counter stops
 
 cd mac_activity_monitor
-
 make
+```
 
 # To Run:
 
-
+```
 install/counter #start the daemon
-
-install/activity #query the daemon.
+install/activity #query the daemon
+```
 
 # Example:
 
+```
 ➜  install/counter
-
 Daemon process PID: 42854
-
-...
-
-➜  install/activity
-
-➜  activity_monitor git:(main) ✗ install/activity
-
------------------------------------------
+```
 
 ```
+➜  install/activity
+➜  activity_monitor git:(main) ✗ install/activity
 \*************************
 \* Day  total: 0h 9m     \*
 \* Week total: 0h 9m     \*
@@ -57,13 +52,16 @@ Daemon process PID: 42854
 
 # For easier use, you can do:
 
+```
 chmod +x install/activity
-
 sudo mv install/activity /usr/local/bin
+```
 
 And then it will be available in your path. Where you can just type in your preferred shell:
 
-> activity
+```
+activity
+```
 
 ---
 
@@ -71,5 +69,7 @@ Only tested on latest mac
 
 # How to upgrade:
 
+```
 kill -STOP `pgrep counter`
 install/counter
+```
