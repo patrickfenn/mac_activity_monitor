@@ -63,7 +63,7 @@ void Counter::loop() {
     while (true) {
         now = std::time(nullptr);
         local_time = std::localtime(&now);
-        if (now == _nextReset) {
+        if (now >= _nextReset) {
             reset();
             updateNextReset();
         }
