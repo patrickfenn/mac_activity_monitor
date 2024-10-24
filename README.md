@@ -20,6 +20,22 @@ cd mac_activity_monitor
 make
 ```
 
+---
+
+# For ease of use:
+
+```
+chmod +x install/activity
+sudo mv install/activity /usr/local/bin
+```
+
+And then it will be available in your path. Where you can just type in your preferred shell:
+
+```
+activity
+```
+
+
 # To Run:
 
 ```
@@ -36,7 +52,6 @@ Daemon process PID: 42854
 
 ```
 ➜  install/activity
-➜  activity_monitor git:(main) ✗ install/activity
 *************************
 * Day  total: 0h 21m    *
 * Week total: 0h 21m    *
@@ -46,26 +61,7 @@ Daemon process PID: 42854
 *************************
 ```
 
------------------------------------------
-
 ---
-
-# For ease of use:
-
-```
-chmod +x install/activity
-sudo mv install/activity /usr/local/bin
-```
-
-And then it will be available in your path. Where you can just type in your preferred shell:
-
-```
-activity
-```
-
----
-
-Only tested on latest mac
 
 # How to upgrade counter daemon:
 
@@ -73,3 +69,7 @@ Only tested on latest mac
 kill -STOP `pgrep counter` # Dump current counters
 install/counter # Run the new daemon
 ```
+
+---
+
+Only tested on latest mac
