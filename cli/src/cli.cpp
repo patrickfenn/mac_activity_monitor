@@ -15,9 +15,6 @@
 // How long it will wait between activity time reads
 #define SLEEP_INTERVAL_SECONDS 1
 
-#define PRINT_BORDER \
-    "**********************************************"
-
 Cli::Cli() {
     _activePath = "/Users/Shared/activity.count";
     _pidPath = "/Users/Shared/activity.pid";
@@ -57,17 +54,21 @@ void Cli::sendSigHup() {
 }
 
 void Cli::print() {
-    static std::vector<std::string> weekDays = {"S", "M", "T", "W", "T", "F", "S"};
+    static std::vector<std::string> weekDays = {
+        "S", "M", "T", "W", "T", "F", "S"};
     std::string activeTime = readActiveTime();
     std::string number = "";
     unsigned long long num = 0;
-    unsigned long long totalActiveMinutes = 0;
+    unsigned long long dailyMinutes = 0;
+    unsigned long long dailyHours = 0;
+    unsigned long long weeklyMinutes = 0;
+    unsigned long long weeklyHours = 0;
     std::vector<unsigned long long> nums;
     std::vector<std::string> weekCounts;
     std::vector<std::string> lines;
     std::string line;
     if (activeTime == "") {
-        std::cerr << "Failed to fetch active time";
+        std::cerr << "Failed to fetch active time" << std::endl;
         return;
     }
     for (const char & c : activeTime) {
@@ -77,7 +78,7 @@ void Cli::print() {
             if (number != "") {
                 num = std::stoull(number);
                 nums.push_back(num);
-                totalActiveMinutes += num;
+                weeklyMinutes += num;
                 number = "";
                 num = 0;
             }
@@ -86,8 +87,15 @@ void Cli::print() {
     for (unsigned long long & activeTime: nums) {
         weekCounts.push_back(minutesToHour(activeTime));
     }
-    lines.push_back("Weekly total hours: " + minutesToHour(totalActiveMinutes));
-    lines.push_back("Weekly breakdown hours:");
+    weeklyHours = weeklyMinutes / 60;
+    weeklyMinutes %= 60;
+    dailyMinutes = nums[getDayNum()];
+    dailyHours = dailyMinutes /60;
+    dailyMinutes %= 60;
+    lines.push_back("Day  total: " + std::to_string(dailyHours) +
+        + "h " + std::to_string(dailyMinutes) + "m");
+    lines.push_back("Week total: " + std::to_string(weeklyHours) +
+        "h " + std::to_string(weeklyMinutes) + "m");
     for (const auto & entry : weekCounts) {
         line += entry + "|";
     }
@@ -95,10 +103,10 @@ void Cli::print() {
     line.clear();
 
     for (auto & c: weekDays) {
-        line += c + "   |";
+        line += c + " |";
     }
     lines.push_back(line);
-    wrap_lines(lines);
+    wrapLines(lines);
     for (const auto & line: lines)
         std::cout << line << std::endl;
 }
@@ -151,16 +159,13 @@ std::time_t Cli::getModifiedTime() {
 
 std::string Cli::minutesToHour(unsigned long long input) {
     unsigned long long activeTimeHours = input / 60;
-    unsigned int activeTimeMinutes = input % 60;
-    double activeTimeHoursMinutes = (double)activeTimeHours +
-        ((double)activeTimeMinutes / 60.00);
     std::stringstream ss;
-    ss << std::fixed << std::setfill('0') << std::setw(4) <<
-        std::setprecision(1) << activeTimeHoursMinutes;
+    ss << std::fixed << std::setfill('0') << std::setw(2) <<
+        activeTimeHours;
     return ss.str();
 }
 
-void Cli::wrap_lines(std::vector<std::string> &lines) {
+void Cli::wrapLines(std::vector<std::string> &lines) {
     int maxLineSize = 0;
     std::stringstream ss;
     for (const auto & line: lines) {
@@ -178,6 +183,13 @@ void Cli::wrap_lines(std::vector<std::string> &lines) {
         line = "* " + line + " *";
     }
     lines.insert(lines.begin(), border);
+    lines.insert(lines.begin() + 3, border);
     lines.push_back(border);
     return;
+}
+
+int Cli::getDayNum() {
+    std::time_t now = std::time(nullptr);
+    auto local_time = std::localtime(&now);
+    return local_time->tm_wday;
 }

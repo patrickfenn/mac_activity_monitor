@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <ctime>
 
 #define COUNTER Counter::getInstance()
 
@@ -19,7 +20,7 @@ private:
     static unsigned long getSystemIdleTime();
     bool write();
     bool read();
-    bool resetTime();
+    void updateNextReset();
     std::string _activePath;
     std::string _pidPath;
     std::string _dayToReset;
@@ -27,4 +28,5 @@ private:
     unsigned long _maxIdleSeconds;
     std::vector<unsigned long long> _activeTime;
     std::tm* local_time;
+    std::time_t _nextReset;
 };

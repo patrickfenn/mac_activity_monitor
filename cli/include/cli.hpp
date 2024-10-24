@@ -15,5 +15,6 @@ private:
     void install_one_off_watch();
     std::time_t getModifiedTime();
     std::string minutesToHour(unsigned long long input);
-    void wrap_lines(std::vector<std::string> &lines);
+    void wrapLines(std::vector<std::string> &lines);
+    int getDayNum();
 };

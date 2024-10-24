@@ -27,7 +27,7 @@ Counter::Counter() {
     if (dayToResetChar)
         _dayToReset = std::string(dayToResetChar);
     else
-        _dayToReset = "Sunday";
+        _dayToReset = "1";
     if (hourToResetChar)
         _hourToReset = std::string(hourToResetChar);
     else
@@ -38,7 +38,7 @@ Counter::Counter() {
     } else {
         _maxIdleSeconds = 600;
     }
-    _activeTime = std::vector<unsigned long long>(7,0);
+    reset();
 }
 
 Counter::~Counter() {
@@ -59,35 +59,20 @@ void Counter::handleSignal(int signal) {
 }
 
 void Counter::loop() {
-    std::time_t now = std::time(nullptr);
-    local_time = std::localtime(&now);
+    std::time_t now;
     while (true) {
-        if (resetTime())
-            getInstance()->reset();
-        if (getSystemIdleTime() < _maxIdleSeconds)
+        now = std::time(nullptr);
+        local_time = std::localtime(&now);
+        if (now == _nextReset) {
+            reset();
+            updateNextReset();
+        }
+        if (getSystemIdleTime() < _maxIdleSeconds) {
             getInstance()->increment();
+        }
         std::this_thread::sleep_for(std::chrono::seconds(
             INCREMENT_INTERVAL_SECONDS));
     }
-}
-
-bool Counter::resetTime() {
-    static std::string days_of_week[] = {
-        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-        "Friday", "Saturday"};
-
-    std::string current_day = days_of_week[local_time->tm_wday];
-    int current_hour = local_time->tm_hour;
-    int current_minute = local_time->tm_min;
-
-    if (current_day == _dayToReset &&
-        std::to_string(current_hour) == _hourToReset &&
-        current_minute == 0) {
-
-        return true;
-    }
-
-    return false;
 }
 
 void Counter::increment() {
@@ -101,7 +86,7 @@ void Counter::reset() {
 void Counter::start() {
     daemonize();
     if (!read()) {
-        _activeTime = std::vector<unsigned long long>(7,0);
+        reset();
     }
     std::signal(SIGHUP, handleSignal);
     std::signal(SIGSTOP, handleSignal);
@@ -204,11 +189,10 @@ bool Counter::read() {
     std::string line;
     std::string number;
     unsigned long long num;
-    int i = 0;
     std::ifstream in(_activePath, std::ios_base::binary);
     if (!in) {
         std::cerr << "Failed to open active time file." << std::endl;
-        return false;
+        return 0;
     }
     ss << in.rdbuf();
     in.close();
@@ -220,15 +204,55 @@ bool Counter::read() {
         } else {
             if (number != "") {
                 num = std::stoull(number);
-                _activeTime[i++] = num;
+                _activeTime.push_back(num);
                 number = "";
                 num = 0;
             }
         }
     }
-    if (_activePath.size() != 7) {
+    if (_activeTime.size() != 7) {
         std::cerr << "Was unable to read in a full week of times." << std::endl;
         return 0;
     }
     return 1;
+}
+
+void Counter::updateNextReset() {
+    // Convert input day and hour to integers
+    int targetDay = std::stoi(_dayToReset);  // 0 = Sunday, ..., 6 = Saturday
+    int targetHour = std::stoi(_hourToReset);      // "00" = 0, "23" = 23, etc.
+
+    // Get the current time
+    auto now = std::chrono::system_clock::now();
+    std::time_t nowTimeT = std::chrono::system_clock::to_time_t(now);
+    std::tm currentTime = *std::localtime(&nowTimeT);
+
+    // Get current day of the week (0 = Sunday, ..., 6 = Saturday)
+    int currentDay = currentTime.tm_wday;
+    int currentHour = currentTime.tm_hour;
+
+    // Calculate the number of days forward to the target day
+    int daysForward = (targetDay - currentDay + 7) % 7;
+
+    // If today is the target day, check the hour
+    if (daysForward == 0 && targetHour <= currentHour) {
+        // If it's today but the target hour has already passed, move to the next week
+        daysForward = 7;
+    }
+
+    // Calculate the target time for the next occurrence
+    std::tm nextOccurrenceTime = currentTime;
+    nextOccurrenceTime.tm_wday = currentDay + daysForward;
+    nextOccurrenceTime.tm_hour = targetHour;
+    nextOccurrenceTime.tm_min = 0;
+    nextOccurrenceTime.tm_sec = 0;
+
+    // Adjust the date for the day difference
+    nextOccurrenceTime.tm_mday += daysForward;
+
+    // Convert the next occurrence time to time_t (seconds since epoch)
+    std::time_t nextOccurrenceEpoch = std::mktime(&nextOccurrenceTime);
+
+    // Return the next occurrence as a time_t
+    _nextReset = nextOccurrenceEpoch;
 }

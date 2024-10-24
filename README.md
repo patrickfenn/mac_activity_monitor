@@ -9,7 +9,8 @@ git clone https://github.com/patrickfenn/mac_activity_monitor.git
 
 #Override optional knobs by settings env variables:
 
-#export DAY_TO_RESET="Sunday" # Reset on Sunday
+#Sunday = 0, Monday = 1, ..., Saturday = 6
+#export DAY_TO_RESET="1" # Reset on Monday
 
 #export HOUR_TO_RESET="00" # At Midnight (24 hour)
 
@@ -40,13 +41,13 @@ Daemon process PID: 42854
 
 -----------------------------------------
 
-Weekly hours: 04.65
-
-Weekly breakdown hours:
-
-00.00 00.00 00.00 02.65 00.00 00.00 00.00
-
-S     M     T     W     T     F     S
+\*************************
+\* Day  total: 0h 9m     \*
+\* Week total: 0h 9m     \*
+\*************************
+\* 00|00|00|00|00|00|00| \*
+\* S |M |T |W |T |F |S | \*
+\************************\*
 
 -----------------------------------------
 
