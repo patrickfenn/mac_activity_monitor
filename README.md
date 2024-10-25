@@ -13,7 +13,7 @@ git clone https://github.com/patrickfenn/mac_activity_monitor.git
 #Sunday = 0, Monday = 1, ..., Saturday = 6
 #export DAY_TO_RESET="1" # Reset on Monday
 
-#export HOUR_TO_RESET="00" # At Midnight (24 hour)
+#export HOUR_TO_RESET="00" # At the beginning of the day (Midnight on Sunday) (24H)
 #export MAX_IDLE_SECONDS=600 # How many seconds one can be afk for until counter stops
 
 cd mac_activity_monitor
@@ -48,14 +48,14 @@ Daemon process PID: 42854
 ```
 
 ```
-➜  install/activity
-*************************
-* Day  total: 0h 21m    *
-* Week total: 0h 21m    *
-*************************
-* 00|00|00|00|00|00|00| *
-* S |M |T |W |T |F |S | *
-*************************
+ ✗ install/activity
+**************************************
+* Day  total: 2h 30m                 *
+* Week total: 2h 30m                 *
+**************************************
+* 00.0|00.0|00.0|00.0|02.5|00.0|00.0 *
+* S   |M   |T   |W   |T   |F   |S    *
+**************************************
 ```
 
 # How to upgrade counter daemon:

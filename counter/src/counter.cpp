@@ -211,6 +211,7 @@ bool Counter::read() {
     }
     if (_activeTime.size() != 7) {
         std::cerr << "Was unable to read in a full week of times." << std::endl;
+        _activeTime.clear();
         return 0;
     }
     return 1;

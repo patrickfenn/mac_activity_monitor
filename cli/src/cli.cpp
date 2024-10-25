@@ -9,10 +9,12 @@
 #include <fcntl.h>
 #include <cstring>
 
+#define PRINT_SETW 4
+
 // How many times it will loop to try to read activity time
 #define MAX_ATTEMPTS 5
 
-// How long it will wait between activity time reads
+// How long it will wait between activity time read attempts
 #define SLEEP_INTERVAL_SECONDS 1
 
 Cli::Cli() {
@@ -20,7 +22,7 @@ Cli::Cli() {
     _pidPath = "/Users/Shared/activity.pid";
     _activePathModTime = getModifiedTime();
     sendSigHup();
-    install_one_off_watch();
+    installOneOffWatch();
     print();
 }
 
@@ -49,8 +51,15 @@ void Cli::sendSigHup() {
     }
     ss << in.rdbuf();
     in.close();
-    pid = std::stoul(ss.str());
-    kill(pid, SIGHUP);
+    try {
+        pid = std::stoul(ss.str());
+        kill(pid, SIGHUP);
+    } catch (std::invalid_argument const& e) {
+        std::cerr << "Unexpected file contents of pid file : " << e.what() <<
+            std::endl;
+        exit(EXIT_FAILURE);
+    }
+
 }
 
 void Cli::print() {
@@ -90,20 +99,27 @@ void Cli::print() {
     weeklyHours = weeklyMinutes / 60;
     weeklyMinutes %= 60;
     dailyMinutes = nums[getDayNum()];
-    dailyHours = dailyMinutes /60;
+    dailyHours = dailyMinutes / 60;
     dailyMinutes %= 60;
     lines.push_back("Day  total: " + std::to_string(dailyHours) +
         + "h " + std::to_string(dailyMinutes) + "m");
     lines.push_back("Week total: " + std::to_string(weeklyHours) +
         "h " + std::to_string(weeklyMinutes) + "m");
-    for (const auto & entry : weekCounts) {
-        line += entry + "|";
+    for (auto it = weekCounts.begin(); it != weekCounts.end(); it++) {
+        line += *it;
+        if (std::next(it) != weekCounts.end())
+            line += "|";
     }
     lines.push_back(line);
     line.clear();
 
-    for (auto & c: weekDays) {
-        line += c + " |";
+    for (auto it = weekDays.begin(); it != weekDays.end(); it++) {
+        line += *it;
+        if (std::next(it) != weekDays.end()) {
+            for (int i = 0; i < PRINT_SETW-1; i++)
+                line += ' ';
+            line += "|";
+        }
     }
     lines.push_back(line);
     wrapLines(lines);
@@ -111,7 +127,7 @@ void Cli::print() {
         std::cout << line << std::endl;
 }
 
-void Cli::install_one_off_watch() {
+void Cli::installOneOffWatch() {
     int attempts = 0;
     std::time_t currentModTime;
     do {
@@ -136,16 +152,12 @@ void Cli::install_one_off_watch() {
 std::time_t Cli::getModifiedTime() {
     try {
         if (std::filesystem::exists(_activePath)) {
-            // Get the last write time as a filesystem::file_time_type
             auto ftime = std::filesystem::last_write_time(_activePath);
-
-            // Convert to a system clock time_point
             auto sctp = std::chrono::time_point_cast<
                 std::chrono::system_clock::duration>(
                     ftime - std::filesystem::file_time_type::clock::now() +
                     std::chrono::system_clock::now());
 
-            // Convert the time_point to time_t (a C-style time)
             return std::chrono::system_clock::to_time_t(sctp);
         } else {
             // File doesn't exist, return the current time
@@ -158,10 +170,10 @@ std::time_t Cli::getModifiedTime() {
 }
 
 std::string Cli::minutesToHour(unsigned long long input) {
-    unsigned long long activeTimeHours = input / 60;
+    double activeTimeHours = (double) input / 60.0;
     std::stringstream ss;
-    ss << std::fixed << std::setfill('0') << std::setw(2) <<
-        activeTimeHours;
+    ss << std::fixed << std::setfill('0') << std::setw(PRINT_SETW) << std::setprecision(1)
+        << activeTimeHours;
     return ss.str();
 }
 

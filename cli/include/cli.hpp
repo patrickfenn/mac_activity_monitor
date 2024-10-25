@@ -12,7 +12,7 @@ private:
     std::string readActiveTime();
     void sendSigHup();
     void print();
-    void install_one_off_watch();
+    void installOneOffWatch();
     std::time_t getModifiedTime();
     std::string minutesToHour(unsigned long long input);
     void wrapLines(std::vector<std::string> &lines);
