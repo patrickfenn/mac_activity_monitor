@@ -7,7 +7,13 @@ The way it works is that this daemon is created and increments every minute. The
 
 ```
 git clone https://github.com/patrickfenn/mac_activity_monitor.git
+cd mac_activity_monitor
+make
+```
 
+# To Run:
+
+```
 #Override optional knobs by settings env variables:
 
 #Sunday = 0, Monday = 1, ..., Saturday = 6
@@ -16,13 +22,6 @@ git clone https://github.com/patrickfenn/mac_activity_monitor.git
 #export HOUR_TO_RESET="00" # At the beginning of the day (Midnight on Sunday) (24H)
 #export MAX_IDLE_SECONDS=600 # How many seconds one can be afk for until counter stops
 
-cd mac_activity_monitor
-make
-```
-
-# To Run:
-
-```
 install/counter #start the daemon
 install/activity #query the daemon
 ```

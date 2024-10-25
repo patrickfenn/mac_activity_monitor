@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <cstring>
 
-// How wide the week double can be in print()
+// How wide the week double can be in print of week breakdown
 #define PRINT_SETW 4
 
 // How many times it will loop to try to read activity time
