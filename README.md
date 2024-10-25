@@ -43,8 +43,9 @@ activity
 # Example:
 
 ```
-➜  install/counter
-Daemon process PID: 42854
+ ✗ install/counter
+Daemon process PID: 33518
+Counter started.
 ```
 
 ```
@@ -61,7 +62,8 @@ Daemon process PID: 42854
 # How to upgrade counter daemon:
 
 ```
-kill -STOP `pgrep counter` # Dump current counters
+kill -1 `pgrep counter` # Dump current counters
+kill -9 `pgrep counter` # Kill the process
 install/counter # Run the new daemon
 ```
 

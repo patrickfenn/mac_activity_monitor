@@ -15,11 +15,16 @@
 
 #define INCREMENT_INTERVAL_SECONDS 60 // Increments every minute
 
+#define BASE_FILE_PATH "/Users/Shared/"
+#define ACTIVITY_COUNT BASE_FILE_PATH "activity.count"
+#define ACTIVITY_PID BASE_FILE_PATH "activity.pid"
+#define ACTIVITY_LOG BASE_FILE_PATH "activity.log"
+
 extern char **environ;
 
 Counter::Counter() {
-    _activePath = "/Users/Shared/activity.count";
-    _pidPath = "/Users/Shared/activity.pid";
+    _activePath = ACTIVITY_COUNT;
+    _pidPath = ACTIVITY_PID;
     char* dayToResetChar = std::getenv("DAY_TO_RESET");
     char* hourToResetChar = std::getenv("HOUR_TO_RESET");
     char* maxIdleSecondsChar = std::getenv("MAX_IDLE_SECONDS");
@@ -68,7 +73,7 @@ void Counter::loop() {
             updateNextReset();
         }
         if (getSystemIdleTime() < _maxIdleSeconds) {
-            getInstance()->increment();
+            increment();
         }
         std::this_thread::sleep_for(std::chrono::seconds(
             INCREMENT_INTERVAL_SECONDS));
@@ -90,14 +95,14 @@ void Counter::start() {
     std::signal(SIGHUP, handleSignal);
     std::signal(SIGSTOP, handleSignal);
     std::thread loopThread(&Counter::loop, this);
+    std::cout << "Counter started" << std::endl;
     loopThread.join();
-    std::cout << "Counter started." << std::endl;
 }
 
 
-// Function to redirect file descriptors to /dev/null
+// Function to redirect file descriptors to log file location
 void Counter::redirectFds() {
-    int fd = open("/Users/Shared/activity.log", O_RDWR);
+    int fd = open(ACTIVITY_LOG, O_RDWR | O_APPEND);
     if (fd != -1) {
         dup2(fd, STDIN_FILENO);
         dup2(fd, STDOUT_FILENO);
@@ -108,7 +113,6 @@ void Counter::redirectFds() {
     }
 }
 
-// Function to create the daemon using posix_spawn
 void Counter::daemonize() {
     pid_t pid;
 

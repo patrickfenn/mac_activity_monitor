@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <cstring>
 
+// How wide the week double can be in print()
 #define PRINT_SETW 4
 
 // How many times it will loop to try to read activity time
@@ -17,9 +18,13 @@
 // How long it will wait between activity time read attempts
 #define SLEEP_INTERVAL_SECONDS 1
 
+#define BASE_FILE_PATH "/Users/Shared/"
+#define ACTIVITY_COUNT BASE_FILE_PATH "activity.count"
+#define ACTIVITY_PID BASE_FILE_PATH "activity.pid"
+
 Cli::Cli() {
-    _activePath = "/Users/Shared/activity.count";
-    _pidPath = "/Users/Shared/activity.pid";
+    _activePath = ACTIVITY_COUNT;
+    _pidPath = ACTIVITY_PID;
     _activePathModTime = getModifiedTime();
     sendSigHup();
     installOneOffWatch();
@@ -101,7 +106,7 @@ void Cli::print() {
     dailyMinutes = nums[getDayNum()];
     dailyHours = dailyMinutes / 60;
     dailyMinutes %= 60;
-    lines.push_back("Day  total: " + std::to_string(dailyHours) +
+    lines.push_back("Day total: " + std::to_string(dailyHours) +
         + "h " + std::to_string(dailyMinutes) + "m");
     lines.push_back("Week total: " + std::to_string(weeklyHours) +
         "h " + std::to_string(weeklyMinutes) + "m");
