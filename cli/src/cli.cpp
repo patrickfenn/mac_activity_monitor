@@ -55,6 +55,11 @@ void Cli::sendSigHup() {
     in.close();
     try {
         pid = std::stoul(ss.str());
+        int result = kill(pid, 0);
+        if (result) {
+            std::cerr << "Pid doesn't exist " << pid << std::endl;
+            exit(EXIT_FAILURE);
+        }
         kill(pid, SIGHUP);
     } catch (std::invalid_argument const& e) {
         std::cerr << "Unexpected file contents of pid file : " << e.what() <<
