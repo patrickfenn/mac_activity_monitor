@@ -67,6 +67,12 @@ kill -9 `pgrep counter` # Kill the process
 install/counter # Run the new daemon
 ```
 
+# Or run the setup script:
+
+```
+./setup.zsh
+```
+
 ---
 
 Only tested on latest mac
