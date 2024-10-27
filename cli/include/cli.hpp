@@ -17,4 +17,5 @@ private:
     std::string minutesToHour(unsigned long long input);
     void wrapLines(std::vector<std::string> &lines);
     int getDayNum();
+    std::string buildRepeatingChar(char c, int i);
 };

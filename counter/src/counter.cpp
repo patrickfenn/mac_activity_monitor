@@ -12,6 +12,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <cstdlib>
+#include <filesystem>
 
 #define INCREMENT_INTERVAL_SECONDS 60 // Increments every minute
 
@@ -23,6 +24,13 @@
 extern char **environ;
 
 Counter::Counter() {
+    if (!std::filesystem::exists(BASE_FILE_PATH) &&
+        !std::filesystem::create_directories(BASE_FILE_PATH)) {
+
+        std::cerr << "Failed to create base path: " <<
+            BASE_FILE_PATH << std::endl;
+        exit(EXIT_FAILURE);
+    }
     _activePath = ACTIVITY_COUNT;
     _pidPath = ACTIVITY_PID;
     char* dayToResetChar = std::getenv("DAY_TO_RESET");
@@ -214,7 +222,8 @@ bool Counter::read() {
         }
     }
     if (_activeTime.size() != 7) {
-        std::cerr << "Was unable to read in a full week of times." << std::endl;
+        std::cerr << "Was unable to read in a full week of times." <<
+            std::endl;
         _activeTime.clear();
         return 0;
     }

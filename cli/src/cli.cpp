@@ -9,9 +9,6 @@
 #include <fcntl.h>
 #include <cstring>
 
-// How wide the week double can be in print of week breakdown
-#define PRINT_SETW 4
-
 // How many times it will loop to try to read activity time
 #define MAX_ATTEMPTS 5
 
@@ -81,6 +78,7 @@ void Cli::print() {
     std::vector<std::string> weekCounts;
     std::vector<std::string> lines;
     std::string line;
+    std::string nextLine = "";
     if (activeTime == "") {
         std::cerr << "Failed to fetch active time" << std::endl;
         return;
@@ -110,23 +108,15 @@ void Cli::print() {
         + "h " + std::to_string(dailyMinutes) + "m");
     lines.push_back("Week total: " + std::to_string(weeklyHours) +
         "h " + std::to_string(weeklyMinutes) + "m");
-    for (auto it = weekCounts.begin(); it != weekCounts.end(); it++) {
-        line += *it;
-        if (std::next(it) != weekCounts.end())
-            line += "|";
+    for (int i = 0; i < weekCounts.size()-1; i++) {
+        line += weekCounts[i] + "|";
+        nextLine += weekDays[i] +
+            buildRepeatingChar(' ', weekCounts[i].size() -1) + "|";
     }
+    line += weekCounts.back();
+    nextLine += weekDays.back();
     lines.push_back(line);
-    line.clear();
-
-    for (auto it = weekDays.begin(); it != weekDays.end(); it++) {
-        line += *it;
-        if (std::next(it) != weekDays.end()) {
-            for (int i = 0; i < PRINT_SETW-1; i++)
-                line += ' ';
-            line += "|";
-        }
-    }
-    lines.push_back(line);
+    lines.push_back(nextLine);
     wrapLines(lines);
     for (const auto & line: lines)
         std::cout << line << std::endl;
@@ -176,23 +166,21 @@ std::time_t Cli::getModifiedTime() {
 
 std::string Cli::minutesToHour(unsigned long long input) {
     double activeTimeHours = (double) input / 60.0;
-    std::stringstream ss;
-    ss << std::fixed << std::setfill('0') << std::setw(PRINT_SETW) << std::setprecision(1)
-        << activeTimeHours;
-    return ss.str();
+    std::stringstream oss;
+    oss << std::fixed << std::setprecision(1) << activeTimeHours;
+    std::string result = oss.str();
+    return result;
 }
 
 void Cli::wrapLines(std::vector<std::string> &lines) {
     int maxLineSize = 0;
-    std::stringstream ss;
     for (const auto & line: lines) {
         if (line.size() > maxLineSize) {
             maxLineSize = line.size();
         }
     }
-    for (int i = 0; i < maxLineSize; i++)
-        ss << '*';
-    std::string border = ss.str() + "****";
+    // Add 4 since we add 2 '*' and 2 ' '.
+    std::string border = buildRepeatingChar('*', maxLineSize + 4);
     for (auto & line: lines) {
         while (line.size() < maxLineSize) {
             line.append(" ");
@@ -209,4 +197,11 @@ int Cli::getDayNum() {
     std::time_t now = std::time(nullptr);
     auto local_time = std::localtime(&now);
     return local_time->tm_wday;
+}
+
+std::string Cli::buildRepeatingChar(char c, int i) {
+    std::ostringstream oss;
+    for (; i > 0; i--)
+        oss << c;
+    return oss.str();
 }
