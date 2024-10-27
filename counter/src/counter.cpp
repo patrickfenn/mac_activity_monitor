@@ -17,9 +17,9 @@
 #define INCREMENT_INTERVAL_SECONDS 60 // Increments every minute
 
 #define BASE_FILE_PATH "/Users/Shared/"
-#define ACTIVITY_COUNT BASE_FILE_PATH "activity.count"
-#define ACTIVITY_PID BASE_FILE_PATH "activity.pid"
-#define ACTIVITY_LOG BASE_FILE_PATH "activity.log"
+#define ACTIVITY_COUNT BASE_FILE_PATH BASE_FILE_PATH "activity.count"
+#define ACTIVITY_PID BASE_FILE_PATH BASE_FILE_PATH "activity.pid"
+#define ACTIVITY_LOG BASE_FILE_PATH BASE_FILE_PATH "activity.log"
 
 extern char **environ;
 
